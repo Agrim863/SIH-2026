@@ -1,0 +1,244 @@
+/**
+ * Ship Card Styles
+ * Renders vessel availability cards with conditional styling based on compatibility.
+ */
+
+.ship-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.ship-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(17, 24, 39, 0.8), rgba(31, 41, 55, 0.6));
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+}
+
+.ship-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.03) 100%);
+  pointer-events: none;
+}
+
+.ship-card.compatible {
+  border-color: rgba(101, 217, 221, 0.3);
+  background: linear-gradient(135deg, rgba(5, 20, 35, 0.9), rgba(20, 35, 55, 0.7));
+  box-shadow: 0 8px 16px rgba(101, 217, 221, 0.1), inset 0 1px 0 rgba(101, 217, 221, 0.2);
+}
+
+.ship-card.compatible:hover {
+  border-color: rgba(101, 217, 221, 0.6);
+  box-shadow: 0 12px 24px rgba(101, 217, 221, 0.2), inset 0 1px 0 rgba(101, 217, 221, 0.3);
+  transform: translateY(-2px);
+}
+
+.ship-card.incompatible {
+  opacity: 0.6;
+  border-color: rgba(244, 63, 94, 0.2);
+  background: linear-gradient(135deg, rgba(20, 15, 15, 0.8), rgba(30, 20, 20, 0.6));
+}
+
+.ship-card.incompatible:hover {
+  opacity: 0.8;
+  border-color: rgba(244, 63, 94, 0.4);
+}
+
+.ship-visual {
+  position: relative;
+  height: 100px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.ship-model {
+  width: 100%;
+  height: 60px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.ship-card.compatible .ship-model {
+  filter: drop-shadow(0 2px 4px rgba(101, 217, 221, 0.3)) brightness(1.1);
+}
+
+.ship-card.incompatible .ship-model {
+  filter: grayscale(60%) opacity(0.7);
+}
+
+/* SVG-based ship silhouettes */
+.ship-model.handysize::before,
+.ship-model.supramax::before,
+.ship-model.panamax::before,
+.ship-model.capesize::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.ship-model.handysize {
+  width: 45%;
+}
+
+.ship-model.supramax {
+  width: 55%;
+}
+
+.ship-model.panamax {
+  width: 70%;
+}
+
+.ship-model.capesize {
+  width: 90%;
+}
+
+.ship-status-compatible,
+.ship-status-incompatible {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.ship-status-compatible {
+  background: #65d9dd;
+  color: #65d9dd;
+}
+
+.ship-status-incompatible {
+  background: #f43f5e;
+  color: #f43f5e;
+}
+
+.ship-info {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ship-class {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.ship-card.compatible .ship-class {
+  color: #65d9dd;
+}
+
+.ship-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.ship-specs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.ship-specs > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ship-dwt {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 0.5rem;
+}
+
+.ship-rate {
+  font-size: 0.85rem;
+  color: #f4c542;
+  font-weight: 600;
+}
+
+.ship-failure {
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  background: rgba(244, 63, 94, 0.15);
+  border-left: 3px solid rgba(244, 63, 94, 0.5);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #ff7a8a;
+  font-style: italic;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .ship-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .ship-card {
+    padding: 1rem;
+  }
+
+  .ship-visual {
+    height: 70px;
+  }
+
+  .ship-name {
+    font-size: 0.9rem;
+  }
+
+  .ship-specs {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ship-grid {
+    grid-template-columns: 1fr;
+  }
+}

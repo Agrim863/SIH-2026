@@ -1,0 +1,363 @@
+.map-engine {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+}
+
+.map-engine .maplibregl-map,
+.map-engine .maplibregl-canvas-container,
+.map-engine canvas.maplibregl-canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.map-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: radial-gradient(circle at center, transparent 48%, rgba(6, 19, 29, 0.28) 100%);
+  pointer-events: none;
+}
+
+/* MapLibre container stays alive in both 2D and 3D (globe projection) */
+#map2d {
+  display: block !important;
+  background: #06131d;
+}
+
+.welcome {
+  position: absolute;
+  z-index: 20;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 370px;
+  padding: 27px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.welcome h1 {
+  font-size: 29px;
+  line-height: 1.12;
+  margin: 15px 0;
+}
+
+.welcome p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #a9c0c8;
+}
+
+.welcome .eyebrow { justify-content: center; }
+.welcome .eyebrow span { color: #70dfbe; }
+
+.welcome-action {
+  margin-top: 12px;
+  width: 100%;
+  border: 0;
+  background: #65d9dd;
+  color: #06131d;
+  padding: 12px;
+  border-radius: 4px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.welcome-action b {
+  float: right;
+  font-size: 18px;
+}
+
+#planner input {
+  width: 100%;
+  margin-top: 9px;
+  padding: 11px;
+  background: #0c2432;
+  border: 1px solid #31434b;
+  color: #e7f8f8;
+  border-radius: 4px;
+  font: 12px Manrope, sans-serif;
+  outline: 0;
+}
+
+#planner input:focus {
+  border-color: #65d9dd;
+}
+
+.search-results {
+  margin-top: 5px;
+  max-height: 176px;
+  overflow: auto;
+}
+
+.search-results button {
+  width: 100%;
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  padding: 9px;
+  border: 0;
+  border-bottom: 1px solid #254958;
+  background: transparent;
+  color: #e5f4f5;
+  font: 11px Manrope, sans-serif;
+  cursor: pointer;
+}
+
+.search-results button:hover {
+  background: #164251;
+}
+
+.search-results small,
+.selected-port small,
+.cargo-options small {
+  font: 9px "DM Mono", monospace;
+  color: #8ba7b0;
+}
+
+.selected-port {
+  display: grid;
+  gap: 3px;
+  margin-top: 9px;
+  padding: 10px;
+  background: #0f2c38;
+  border: 1px solid rgba(101, 217, 221, 0.45);
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+/* Ships are MapLibre markers — this is a non-positioning host */
+.ships {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  z-index: 12;
+  pointer-events: none;
+}
+
+.ship-geo,
+.ship-marker {
+  display: grid;
+  gap: 5px;
+  align-items: center;
+  justify-items: center;
+  text-align: center;
+  background: rgba(6, 27, 42, 0.92);
+  border: 1px solid #4d7c86;
+  border-radius: 6px;
+  color: #d8f0f1;
+  padding: 10px 11px 8px;
+  font: 9px "DM Mono", monospace;
+  cursor: pointer;
+  pointer-events: auto;
+  min-width: 96px;
+  animation: ship-emerge 0.7s ease-out both;
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s, transform 0.25s;
+  transform-style: preserve-3d;
+  perspective: 420px;
+}
+
+.ship-geo b,
+.ship-marker b {
+  font: 700 10px Manrope, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.ship-geo small,
+.ship-marker small {
+  font-size: 8px;
+  color: #8eabb2;
+  max-width: 150px;
+  white-space: normal;
+  line-height: 1.35;
+}
+
+.ship-geo.selected,
+.ship-marker.selected {
+  background: #65d9dd;
+  color: #112832;
+  border-color: #b4ffff;
+  box-shadow: 0 0 18px rgba(101, 217, 221, 0.4);
+}
+
+.ship-geo.selected small,
+.ship-marker.selected small {
+  color: #1a3a44;
+}
+
+.ship-geo.disabled,
+.ship-marker.disabled {
+  opacity: 0.45;
+  filter: grayscale(1);
+  cursor: not-allowed;
+}
+
+/* Stylized 3D ship silhouette — size scales with vessel class */
+.ship-3d {
+  width: var(--ship-w, 40px);
+  height: calc(var(--ship-w, 40px) * 0.42);
+  position: relative;
+  transform: rotateX(52deg) rotateZ(-8deg);
+  transform-style: preserve-3d;
+  margin: 2px auto 4px;
+}
+
+.ship-3d-hull {
+  position: absolute;
+  inset: 35% 0 0;
+  background: linear-gradient(180deg, #9ad8dc 0%, #4e9198 55%, #2d5c64 100%);
+  clip-path: polygon(4% 40%, 18% 0, 82% 0, 96% 40%, 90% 100%, 10% 100%);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.35);
+}
+
+.ship-3d-super {
+  position: absolute;
+  left: 28%;
+  right: 34%;
+  top: 8%;
+  height: 38%;
+  background: linear-gradient(180deg, #d7f4f5, #6eb8bf);
+  border-radius: 2px 2px 0 0;
+  transform: translateZ(6px);
+}
+
+.ship-3d-bridge {
+  position: absolute;
+  left: 52%;
+  width: 18%;
+  top: 0;
+  height: 28%;
+  background: #e8ffff;
+  border-radius: 1px;
+  transform: translateZ(10px);
+  box-shadow: 0 0 6px rgba(180, 255, 255, 0.35);
+}
+
+.ship-marker.disabled .ship-3d-hull,
+.ship-marker.disabled .ship-3d-super,
+.ship-marker.disabled .ship-3d-bridge {
+  background: #6a7a80;
+  box-shadow: none;
+}
+
+.ship-marker:not(.disabled):hover {
+  transform: translateY(-2px);
+  border-color: #65d9dd;
+}
+
+@keyframes ship-emerge {
+  from {
+    opacity: 0;
+    transform: scale(0.82) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.geo-marker {
+  border: 0;
+  background: transparent;
+  color: white;
+  cursor: default;
+  text-shadow: 0 1px 5px #00121c;
+  font: 600 11px Manrope, sans-serif;
+  text-align: center;
+  padding: 0;
+}
+
+.geo-marker .marker-core,
+.geo-marker span {
+  display: block;
+  width: 12px;
+  height: 12px;
+  margin: 0 auto 4px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: #65d9dd;
+  position: relative;
+}
+
+.geo-marker.origin .marker-core,
+.geo-marker.origin span {
+  background: #65d9dd;
+  box-shadow: 0 0 0 5px rgba(101, 217, 221, 0.28);
+}
+
+.geo-marker.destination .marker-core,
+.geo-marker.destination span {
+  background: #f4c542;
+  box-shadow: 0 0 0 5px rgba(244, 197, 66, 0.28);
+}
+
+.geo-marker.pulse-in .marker-core::after,
+.geo-marker.pulse-in span::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  color: inherit;
+  animation: port-pulse 2.2s ease-out infinite;
+}
+
+.geo-marker.origin .marker-core::after { color: #65d9dd; }
+.geo-marker.destination .marker-core::after { color: #f4c542; }
+
+.geo-marker b {
+  display: block;
+  white-space: nowrap;
+}
+
+.geo-marker small {
+  display: block;
+  font: 8px "DM Mono", monospace;
+  color: #b7e9eb;
+  letter-spacing: 0.06em;
+}
+
+@keyframes port-pulse {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.geo-marker.pulse-in .marker-core {
+  animation: marker-appear 0.9s ease-out both;
+}
+
+@keyframes marker-appear {
+  from {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.maplibregl-ctrl-group {
+  background: rgba(8, 38, 56, 0.92) !important;
+  border: 1px solid rgba(156, 206, 218, 0.2) !important;
+}
+
+.maplibregl-ctrl-group button {
+  background-color: transparent !important;
+}
+
+@media (max-width: 700px) {
+  .welcome { width: 290px; }
+  .search-panel { max-height: 65vh; overflow: auto; }
+  .geo-marker b { font-size: 9px; }
+}

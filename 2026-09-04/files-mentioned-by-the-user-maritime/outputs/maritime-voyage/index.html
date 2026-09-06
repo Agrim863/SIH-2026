@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Meridian — Freight Intelligence</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/geography.css">
+</head>
+<body>
+  <main class="app" id="app" data-mode="2d">
+    <div class="map-engine" id="map2d" aria-label="Interactive geographic voyage map"></div>
+    <div class="map-vignette"></div>
+
+    <header class="topbar">
+      <a class="brand" href="#">
+        <span class="brand-mark">M</span>
+        <span>MERIDIAN</span>
+        <em>/ FREIGHT INTELLIGENCE</em>
+      </a>
+      <nav class="mode-switch">
+        <button type="button" class="mode active" data-mode="2d">⌁ 2D MAP</button>
+        <button type="button" class="mode" data-mode="3d">◉ 3D GLOBE</button>
+      </nav>
+      <button type="button" class="avatar">AS</button>
+    </header>
+
+    <section class="welcome glass" id="welcome">
+      <div class="eyebrow">VOYAGE PLANNER <span>● LIVE DATA</span></div>
+      <h1>Where are you<br>shipping from?</h1>
+      <p>Start with an origin port. The route, vessel compatibility and freight outlook follow from there.</p>
+      <button type="button" class="welcome-action" id="welcome-action">Select origin <b>→</b></button>
+    </section>
+
+    <aside class="search-panel glass" id="planner">
+      <div id="origin-step">
+        <div class="eyebrow"><span class="step-dot active">1</span> ORIGIN</div>
+        <input id="origin-search" placeholder="Search a loading port…">
+        <div class="search-results" id="origin-results"></div>
+      </div>
+      <div class="hidden" id="destination-step">
+        <div class="field-connector"></div>
+        <div class="eyebrow"><span class="step-dot active">2</span> DESTINATION</div>
+        <input id="destination-search" placeholder="Search destination port…">
+        <div class="search-results" id="destination-results"></div>
+      </div>
+      <div class="hidden" id="cargo-step">
+        <div class="field-connector"></div>
+        <div class="eyebrow"><span class="step-dot active">3</span> CARGO</div>
+        <div class="cargo-options">
+          <button type="button" data-cargo="ironOre">Iron ore</button>
+          <button type="button" data-cargo="thermalCoal">Thermal coal</button>
+          <button type="button" data-cargo="limestone">Limestone</button>
+        </div>
+      </div>
+    </aside>
+
+    <section class="ships hidden" id="ships" aria-hidden="true"></section>
+
+    <aside class="intelligence glass hidden" id="intelligence">
+      <div class="intel-top">● FREIGHT INTELLIGENCE</div>
+      <h1 id="intel-title"></h1>
+      <div class="rate">
+        <span>Indicative spot rate</span>
+        <b id="spot-rate"></b>
+        <em>+ 3.2% this week</em>
+      </div>
+      <div class="intel-grid">
+        <div>
+          <span>FORECAST RANGE</span>
+          <b id="forecast-range"></b>
+        </div>
+        <div>
+          <span>MARKET OUTLOOK</span>
+          <b class="positive">↗ Rising</b>
+        </div>
+      </div>
+      <div class="recommendation">
+        <span>RECOMMENDATION</span>
+        <b>Lock cargo within 7 days</b>
+        <small>Projected rate pressure from Australian demand.</small>
+      </div>
+    </aside>
+
+    <section class="vessel-dock glass hidden" id="vessel-dock">
+      <div class="dock-handle"></div>
+      <div class="dock-heading">
+        <div>
+          <span class="eyebrow">AVAILABLE VESSELS</span>
+          <h2>
+            <span class="selected-line"></span>
+            <span id="dock-class">Panamax</span>
+            <small id="vessel-count"></small>
+          </h2>
+        </div>
+      </div>
+      <div class="vessel-list" id="vessel-list"></div>
+    </section>
+
+    <div class="toast" id="toast" role="status"></div>
+  </main>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
