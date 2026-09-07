@@ -42,15 +42,23 @@ function shipModelHtml(vessel: VesselClassSpec, ok: boolean, reason: string | nu
 
 export function drawShips(): void {
   const s = getState();
-  if (!s.routeAnimationComplete || !s.origin) return;
+  console.log('[drawShips] enter: routeAnimationComplete=', s.routeAnimationComplete, 'origin=', s.origin?.name, 'avail=', s.vesselAvailability?.length);
+  if (!s.routeAnimationComplete || !s.origin) {
+    console.log('[drawShips] early-return (animation not done or no origin)');
+    return;
+  }
 
   clearVesselMarkers();
   const shipsEl = $('#ships');
-  if (!shipsEl) return;
+  if (!shipsEl) {
+    console.log('[drawShips] #ships element not found in DOM');
+    return;
+  }
   shipsEl.classList.remove('hidden');
   shipsEl.innerHTML = '';
 
   const map = getMap();
+  console.log('[drawShips] map available?', !!map, 'origin lat/lng:', s.origin.lat, s.origin.lng);
   const availability = s.vesselAvailability ?? [];
   const lookup = new Map<VesselClass, VesselAvailability>();
   availability.forEach((a) => lookup.set(a.vesselClass, a));
@@ -78,14 +86,17 @@ export function drawShips(): void {
     if (map && s.origin && s.origin.lat !== null && s.origin.lng !== null) {
       const lng: number = s.origin.lng;
       const lat: number = s.origin.lat;
+      console.log('[drawShips] adding marker for', vessel.id, 'at', lng + offset.lng, lat + offset.lat, 'compatible:', ok);
       const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
         .setLngLat([lng + offset.lng, lat + offset.lat])
         .addTo(map);
       vesselMarkers.push(marker);
     } else {
+      console.log('[drawShips] no map or no lat/lng — appending to hidden #ships DOM');
       shipsEl.appendChild(el);
     }
   });
+  console.log('[drawShips] DONE. Markers on map:', vesselMarkers.length);
 }
 
 export function selectVesselType(id: VesselClass): void {
