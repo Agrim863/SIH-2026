@@ -2,9 +2,12 @@
  * Vessel class markers, vessel selection, and the vessel-instance drawer.
  * Compatibility comes from the canonical checkAllVesselsForVoyage() engine.
  * Vessel instances come from VESSEL_INSTANCES, not the legacy MOCK_VESSELS.
+ *
+ * Markers are positioned using map.project() → pixel coordinates, not MapLibre
+ * Marker objects, so they are immune to MapLibre's internal z-ordering and
+ * projection-switching issues.
  */
 
-import maplibregl from 'maplibre-gl';
 import { VESSEL_CLASSES, type VesselClass, type VesselClassSpec } from '../../data/vessels';
 import { VESSEL_INSTANCES, type VesselInstance } from '../../data/vesselInstances';
 import type { VesselAvailability } from '../../lib/voyageAvailability';
@@ -13,6 +16,21 @@ import { TIMING } from '../../utils/timing';
 import { flash } from './toast';
 import { getState, setState } from '../state';
 import { drawAnalysis } from './intelligence';
+
+/** Container that holds pixel-positioned vessel markers (width:0, overflow:visible) */
+const SHIPS_ID = 'ships';
+
+/** Ensure the ships container exists in the DOM */
+function getShipsContainer(): HTMLElement {
+  let el = document.getElementById(SHIPS_ID);
+  if (!el) {
+    el = document.createElement('section');
+    el.id = SHIPS_ID;
+    el.className = 'ships';
+    document.getElementById('app')?.appendChild(el);
+  }
+  return el;
+}
 
 const $ = (selector: string): HTMLElement | null =>
   document.querySelector(selector);
@@ -42,26 +60,21 @@ function shipModelHtml(vessel: VesselClassSpec, ok: boolean, reason: string | nu
 
 export function drawShips(): void {
   const s = getState();
-  console.log('[drawShips] enter: routeAnimationComplete=', s.routeAnimationComplete, 'origin=', s.origin?.name, 'avail=', s.vesselAvailability?.length);
-  if (!s.routeAnimationComplete || !s.origin) {
-    console.log('[drawShips] early-return (animation not done or no origin)');
-    return;
-  }
+  if (!s.routeAnimationComplete || !s.origin) return;
+  if (s.origin.lat === null || s.origin.lng === null) return;
 
   clearVesselMarkers();
-  const shipsEl = $('#ships');
-  if (!shipsEl) {
-    console.log('[drawShips] #ships element not found in DOM');
-    return;
-  }
+  const shipsEl = getShipsContainer();
   shipsEl.classList.remove('hidden');
   shipsEl.innerHTML = '';
 
   const map = getMap();
-  console.log('[drawShips] map available?', !!map, 'origin lat/lng:', s.origin.lat, s.origin.lng);
   const availability = s.vesselAvailability ?? [];
   const lookup = new Map<VesselClass, VesselAvailability>();
   availability.forEach((a) => lookup.set(a.vesselClass, a));
+
+  const originLng: number = s.origin.lng;
+  const originLat: number = s.origin.lat;
 
   VESSEL_CLASSES.forEach((vessel, index) => {
     const avail = lookup.get(vessel.id);
@@ -83,20 +96,24 @@ export function drawShips(): void {
       el.onclick = () => selectVesselType(vessel.id);
     }
 
-    if (map && s.origin && s.origin.lat !== null && s.origin.lng !== null) {
-      const lng: number = s.origin.lng;
-      const lat: number = s.origin.lat;
-      console.log('[drawShips] adding marker for', vessel.id, 'at', lng + offset.lng, lat + offset.lat, 'compatible:', ok);
-      const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
-        .setLngLat([lng + offset.lng, lat + offset.lat])
-        .addTo(map);
-      vesselMarkers.push(marker);
+    if (map) {
+      // Use map.project() to get pixel coordinates, then position with CSS.
+      // This is more reliable than MapLibre Marker objects across projection switches.
+      const pt = map.project([originLng + offset.lng, originLat + offset.lat]);
+      el.style.position = 'absolute';
+      el.style.left = `${pt.x}px`;
+      el.style.top = `${pt.y}px`;
+      el.style.transform = 'translate(-50%, -50%)';
+      el.style.zIndex = String(index + 10);
+      map.getContainer().appendChild(el);
+      // Keep a marker reference for cleanup tracking
+      const marker = { el, remove: () => el.remove() };
+      vesselMarkers.push(marker as typeof vesselMarkers[number]);
     } else {
-      console.log('[drawShips] no map or no lat/lng — appending to hidden #ships DOM');
+      // Fallback: append to ships container (relative layout)
       shipsEl.appendChild(el);
     }
   });
-  console.log('[drawShips] DONE. Markers on map:', vesselMarkers.length);
 }
 
 export function selectVesselType(id: VesselClass): void {

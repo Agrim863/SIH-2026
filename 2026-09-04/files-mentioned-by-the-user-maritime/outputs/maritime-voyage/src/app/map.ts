@@ -27,7 +27,7 @@ const $ = (selector: string): HTMLElement | null =>
 
 let mapInstance: MapLibreMap | null = null;
 export const portMarkers: Marker[] = [];
-export const vesselMarkers: Marker[] = [];
+export const vesselMarkers: { el: HTMLElement; remove: () => void }[] = [];
 
 export function getMap(): MapLibreMap | null {
   return mapInstance;
@@ -250,7 +250,6 @@ export function clearPortMarkers(): void {
 }
 
 export function clearVesselMarkers(): void {
-  console.log('[clearVesselMarkers] clearing', vesselMarkers.length, 'markers');
   vesselMarkers.forEach((m) => m.remove());
   vesselMarkers.length = 0;
   const ships = $('#ships');
@@ -311,17 +310,10 @@ export function fitVoyageOverview(duration = 1400): void {
 }
 
 export function flyToPort(port: Port, zoom = 5.6): Promise<void> {
-  if (!mapInstance) {
-    console.log('[flyToPort] no map instance');
-    return Promise.resolve();
-  }
-  if (port.lat === null || port.lng === null) {
-    console.log('[flyToPort] null lat/lng for', port.name);
-    return Promise.resolve();
-  }
+  if (!mapInstance) return Promise.resolve();
+  if (port.lat === null || port.lng === null) return Promise.resolve();
   const lat: number = port.lat;
   const lng: number = port.lng;
-  console.log('[flyToPort] flying to', port.name, 'at', lng, lat, 'zoom', zoom);
   return new Promise<void>((resolve) => {
     mapInstance?.flyTo({
       center: [lng, lat],
@@ -331,10 +323,7 @@ export function flyToPort(port: Port, zoom = 5.6): Promise<void> {
       curve: 1.2,
       speed: 0.6,
     });
-    mapInstance?.once('moveend', () => {
-      console.log('[flyToPort] moveend fired — resolving');
-      resolve();
-    });
+    mapInstance?.once('moveend', () => resolve());
   });
 }
 

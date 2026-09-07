@@ -80,33 +80,23 @@ export async function buildWaterOnlyRoute(
 }
 
 async function onRouteAnimationComplete(): Promise<void> {
-  console.log('[route:onRouteAnimationComplete] START');
   setState({ routeAnimationComplete: true });
   flash('Voyage route complete — opening origin for vessel classes');
 
   const s = getState();
-  console.log('[route:onRouteAnimationComplete] state: origin=', s.origin?.name, 'dest=', s.destination?.name, 'cargo=', s.cargo);
   if (s.origin) {
-    console.log('[route:onRouteAnimationComplete] flying to origin');
     await flyToPort(s.origin, 6.2);
-    console.log('[route:onRouteAnimationComplete] flyToPort DONE');
   }
 
   // Calculate vessel availability for the complete voyage using the canonical engine
   if (s.origin && s.destination && s.cargo) {
-    console.log('[route:onRouteAnimationComplete] computing vessel availability');
     const avail = checkAllVesselsForVoyage(s.origin.id, s.destination.id, s.cargo);
-    console.log('[route:onRouteAnimationComplete] availability:', avail.map(a => a.vesselClass + ':' + a.isCompatible).join(', '));
     setState({ vesselAvailability: avail });
-  } else {
-    console.log('[route:onRouteAnimationComplete] SKIPPING availability — missing', !s.origin ? 'origin' : '', !s.destination ? 'destination' : '', !s.cargo ? 'cargo' : '');
   }
 
-  console.log('[route:onRouteAnimationComplete] calling drawShips');
   drawShips();
   drawAnalysis();
   flash('Select a vessel class at origin');
-  console.log('[route:onRouteAnimationComplete] END');
 }
 
 function animateRoute(): void {
@@ -135,7 +125,6 @@ function animateRoute(): void {
     if (t < 1) {
       requestAnimationFrame(frame);
     } else {
-      console.log('[route] animation complete — calling onRouteAnimationComplete');
       onRouteAnimationComplete();
     }
   }
