@@ -1,6 +1,9 @@
 /**
  * Precompute water-only port-to-port routes (ocean A*).
  * Run: node scripts/generate-routes.mjs
+ *
+ * Generates all CROSS-COUNTRY routes (never same-country pairs).
+ * Countries: India (2 ports), Australia (2 ports), Mozambique (3 ports) = 16 routes total.
  */
 import { findOceanPath } from '@arcnautical/maritime-routing';
 import { mkdirSync, writeFileSync } from 'fs';
@@ -8,13 +11,16 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+/** [name, lat, lng, country] — kept in sync with src/data/ports.ts */
 const ports = [
-  ['Paradip', 20.2644, 86.6729],
-  ['Visakhapatnam', 17.6868, 83.2185],
-  ['Gangavaram', 17.6167, 83.2333],
-  ['Dhamra', 20.8217, 86.9625],
-  ['Gladstone', -23.8416, 151.25],
-  ['Newcastle', -32.9267, 151.7817]
+  ['Paradip',       20.2644,  86.6729, 'India'],
+  ['Visakhapatnam', 17.6868,  83.2185, 'India'],
+  ['Port Hedland', -20.3097, 118.5764, 'Australia'],
+  ['Gladstone',   -23.8416, 151.2500, 'Australia'],
+  ['Beira',       -19.8436,  34.8389, 'Mozambique'],
+  ['Nacala',      -14.5427,  40.6890, 'Mozambique'],
+  ['Maputo',      -25.9692,  32.5732, 'Mozambique'],
 ];
 
 function downsample(coords, target = 280) {
@@ -30,23 +36,25 @@ function downsample(coords, target = 280) {
   return out;
 }
 
-const india = ports.filter((p) => p[1] > 0);
-const aus = ports.filter((p) => p[1] < 0);
 const routes = {};
 
-for (const [on, olat, olng] of india) {
-  for (const [dn, dlat, dlng] of aus) {
+for (const [oname, olat, olng, ocountry] of ports) {
+  for (const [dname, dlat, dlng, dcountry] of ports) {
+    if (oname === dname) continue;                          // same port
+    if (ocountry === dcountry) continue;                    // same country — skip
+    const key = `${oname}->${dname}`;
+    if (routes[key]) continue;                              // already generated as reverse
+
     const path = findOceanPath(olat, olng, dlat, dlng);
     const coords = downsample(path.map((p) => [p[0], p[1]]));
     coords[0] = [olng, olat];
     coords[coords.length - 1] = [dlng, dlat];
-    const key = `${on}->${dn}`;
     routes[key] = {
       type: 'Feature',
       properties: { pair: key, points: coords.length, source: 'ocean-astar' },
       geometry: { type: 'LineString', coordinates: coords }
     };
-    console.log(key, coords.length);
+    console.log(key, '→', coords.length, 'points');
   }
 }
 
